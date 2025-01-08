@@ -13,9 +13,7 @@ app.use(bodyParser.json()); // Parse JSON payloads
 
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => {
     console.error('Database connection error:', err);
@@ -34,6 +32,12 @@ app.get('/', (req, res) => {
 // 404 Route for Undefined Routes
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Route not found' });
+});
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal server error' });
 });
 
 // Start Server
