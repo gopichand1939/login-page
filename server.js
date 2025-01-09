@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+const helmet = require('helmet'); // Adds security headers
 require('dotenv').config(); // Load environment variables
 
 // Initialize Express
@@ -9,11 +9,26 @@ const app = express();
 
 // Middleware
 app.use(cors()); // Enable CORS
-app.use(bodyParser.json()); // Parse JSON payloads
+app.use(helmet()); // Add security headers
+app.use(express.json()); // Parse JSON payloads
+
+// Validate Environment Variables
+if (!process.env.MONGO_URI) {
+  console.error('Error: MONGO_URI is not defined in .env');
+  process.exit(1); // Exit process if the MongoDB URI is not provided
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('Error: JWT_SECRET is not defined in .env');
+  process.exit(1); // Exit process if the JWT secret is not provided
+}
 
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => {
     console.error('Database connection error:', err);
